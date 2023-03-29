@@ -54,7 +54,6 @@ router.get("/edit_respon", async (req, res) => {
         res.json({ result: error, api_result: constance.NOK });
     }
 });
-
 router.put("/update_respon", async (req, res) => {
     console.log("update_respon");
     try {
