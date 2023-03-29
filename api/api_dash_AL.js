@@ -24,6 +24,7 @@ router.post("/find_ct", async (req, res) => {
           ,format(sum([accum_output]), '#,##0') as [accum_output]
           ,cast(cast(sum([work_hour]) AS DECIMAL(10,2))/cast(sum([accum_output]) AS DECIMAL(10,2)) AS DECIMAL(10,2))  as [ct]
           from tb3 group by [registered_at]`;
+          
     } else {
         command_final = `select [registered_at]
           ,format([work_hour], '#,##0') as [work_hour]
