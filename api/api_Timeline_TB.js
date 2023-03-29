@@ -14,6 +14,7 @@ router.post("/mc_list", async (req, res) => {
             FROM [counter].[dbo].[mms]
             where left([mc_no],2) = 'TB' 
             group by [mc_no]
+            order by [mc_no]
             `
         );
         return res.json({
