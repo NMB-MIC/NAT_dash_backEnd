@@ -14,7 +14,6 @@ router.post("/list_mc", async (req, res) => {
     );
     return res.json({ result: result[0] });
 });
-
 router.post("/Add_item", async (req, res) => {
     try {
         let result = await topic_master.create(req.body)
@@ -23,7 +22,6 @@ router.post("/Add_item", async (req, res) => {
         res.json({ result: error, api_result: constance.NOK });
     }
 });
-
 router.get("/get_topic_list", async (req, res) => {
     try {
         let result = await topic_master.sequelize.query(
@@ -39,7 +37,6 @@ router.get("/get_topic_list", async (req, res) => {
         res.json({ result: error, api_result: constance.NOK });
     }
 });
-
 router.get("/edit_respon", async (req, res) => {
     try {
         let result = await topic_master.sequelize.query(
@@ -65,14 +62,13 @@ router.put("/update_respon", async (req, res) => {
         res.json({ error, api_result: constance.NOK });
     }
 });
-
-router.post("/upload/:machine/:Topic/:responsible", async (req, res) => {
+// import Topic (CSV)
+router.post("/upload", async (req, res) => {
     console.log("upload check");
     try {
-        const { machine, Topic, responsible } = req.params
         let result = await topic_master.sequelize.query(
             `INSERT INTO [topic_masters]
-           ([machine],[Topic],[responsible]) VALUES ('${machine}', '${Topic}','${responsible}') `
+           ([machine],[Topic],[responsible]) VALUES ('${req.body.machine}', '${req.body.Topic}','${req.body.responsible}') `
         );
         // console.log( result );
         res.json({ result, api_result: constance.OK });
@@ -81,6 +77,8 @@ router.post("/upload/:machine/:Topic/:responsible", async (req, res) => {
         res.json({ error, api_result: constance.NOK });
     }
 });
+
+
 
 
 module.exports = router;

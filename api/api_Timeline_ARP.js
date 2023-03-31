@@ -4,106 +4,15 @@ const Sequelize = require("Sequelize");
 const users = require("../model/users");
 const constance = require("../constance/constance");
 
-function generateDateList(from, to) {
-    var getDate = function (date) {
-        //Mysql Format
-        var m = date.getMonth(),
-            d = date.getDate();
-        return date.getFullYear() + "-" + (m < 10 ? "0" + m : m) + "-" + (d < 10 ? "0" + d : d);
-    };
-    var fs = from.split("-"),
-        startDate = new Date(fs[0], fs[1], fs[2]),
-        result = [getDate(startDate)],
-        start = startDate.getTime(),
-        ts,
-        end;
-
-    if (typeof to == "undefined") {
-        end = new Date().getTime();
-    } else {
-        ts = to.split("-");
-        end = new Date(ts[0], ts[1], ts[2]).getTime();
-    }
-    while (start < end) {
-        start += 86400000;
-        startDate.setTime(start);
-        result.push(getDate(startDate));
-    }
-    return result;
-}
-
-//  XX 
-router.post("/test", async (req, res) => {
-    let result = await users.sequelize.query(
-        `
-      with tb1 as (
-        select [topic_group]
-           ,convert(varchar, [mms].[occurred], 23) as mfg_date
-           --,convert(varchar, [mms].[registered_at], 120) as [Time]
-           ,convert(varchar, [mms].[occurred],120) as [occurred]
-           ,convert(varchar, [mms].[restored],120) as [restored]
-           ,IIF(CAST(DATEPART(HOUR, [mms].[occurred]) AS int)=0,23,CAST(DATEPART(HOUR, [mms].[occurred]) AS int)) as [hour]
-           ,[topic]
-           ,[sum]
-           ,[mc_no]
-            FROM [counter].[dbo].[mms]
-            where convert(varchar, [mms].[occurred], 23) = '${req.body.date}'
-            and [mc_no] = '${req.body.machine}' 
-        )
-        , tb2 as (select 
-        [topic_group]
-        ,topic,[sum]
-        ,mfg_date ,[hour] 
-        ,[occurred],[restored]
-        ,CASE
-              WHEN [hour] = 8 THEN 1
-              WHEN [hour] = 9 THEN 2
-              WHEN [hour] = 10 THEN 3
-              WHEN [hour] = 11 THEN 4
-              WHEN [hour] = 12 THEN 5
-              WHEN [hour] = 13 THEN 6
-              WHEN [hour] = 14 THEN 7
-              WHEN [hour] = 15 THEN 8
-              WHEN [hour] = 16 THEN 9
-              WHEN [hour] = 17 THEN 10
-              WHEN [hour] = 18 THEN 11
-              WHEN [hour] = 19 THEN 12
-              WHEN [hour] = 20 THEN 13
-              WHEN [hour] = 21 THEN 14
-              WHEN [hour] = 22 THEN 15
-              WHEN [hour] = 23 THEN 16
-              WHEN [hour] = 0 THEN 17
-              WHEN [hour] = 1 THEN 18
-              WHEN [hour] = 2 THEN 19
-              WHEN [hour] = 3 THEN 20
-              WHEN [hour] = 4 THEN 21
-              WHEN [hour] = 5 THEN 22
-              WHEN [hour] = 6 THEN 23
-             WHEN [hour] = 7 THEN 24
-       else 0   end
-       as [work_hour]
-       from tb1  
-        )
-        select topic ,sum
-        ,[occurred]
-		,[restored]
-	
-        from tb2
-        order by [work_hour],[occurred]
-      `
-    );
-    return res.json({ result: result[0] });
-});
-
 router.post("/mc_list", async (req, res) => {
     try {
         let result = await users.sequelize.query(
             `
             SELECT [mc_no]
             FROM [counter].[dbo].[mms]
-            where left([mc_no],2) = 'AL' 
+            where left([mc_no],3) = 'ARP' 
             group by [mc_no]
-            order by [mc_no] 
+            order by [mc_no]
             `
         );
         return res.json({
@@ -119,115 +28,6 @@ router.post("/mc_list", async (req, res) => {
     }
 
 });
-
-router.post("/test1", async (req, res) => {
-    let result = await users.sequelize.query(
-        `
-        /* ++++++ */
-        with tb1 as(
-            select [topic],
-            format (iif(DATEPART(HOUR, [occurred])<7,dateadd(day,-1,[occurred]),[occurred]),'yyyy-MM-dd') as mfg_date
-            ,[occurred]
-            ,[restored]
-           --,convert(varchar, [mms].[occurred],120) as [occurred]
-           --,convert(varchar, [mms].[restored],120) as [restored]
-           ,IIF(CAST(DATEPART(HOUR, [mms].[occurred]) AS int)=0,23,CAST(DATEPART(HOUR, [mms].[occurred]) AS int)) as [hour]
-           ,[mc_no]
-           ,[sum]
-           FROM [counter].[dbo].[mms]
-           )
-           select  mfg_date,[topic]
-           ,convert(varchar,[occurred],120) as [occurred]
-		   ,convert(varchar,[restored],120) as [restored],[hour],[sum]
-           from tb1
-           where mfg_date = '${req.body.date}'
-           and [mc_no] = '${req.body.machine}'
-           order by CASE
-                         WHEN [hour] = 7 THEN 1
-                         WHEN [hour] = 8 THEN 2
-                         WHEN [hour] = 9 THEN 3
-                         WHEN [hour] = 10 THEN 4
-                         WHEN [hour] = 11 THEN 5
-                         WHEN [hour] = 12 THEN 6
-                         WHEN [hour] = 13 THEN 7
-                         WHEN [hour] = 14 THEN 8
-                         WHEN [hour] = 15 THEN 9
-                         WHEN [hour] = 16 THEN 10
-                         WHEN [hour] = 17 THEN 11
-                         WHEN [hour] = 18 THEN 12
-                         WHEN [hour] = 19 THEN 13
-                         WHEN [hour] = 20 THEN 14
-                         WHEN [hour] = 21 THEN 15
-                         WHEN [hour] = 22 THEN 16
-                         WHEN [hour] = 23 THEN 17
-                         WHEN [hour] = 0 THEN 18
-                         WHEN [hour] = 1 THEN 19
-                         WHEN [hour] = 2 THEN 20
-                         WHEN [hour] = 3 THEN 21
-                         WHEN [hour] = 4 THEN 22
-                         WHEN [hour] = 5 THEN 23
-                        WHEN [hour] = 6 THEN 24
-                  else 0   end ,[occurred]
-
-      `
-    );
-    return res.json({ result: result[0] });
-});
-
-// router.post("/mc_status", async (req, res) => {
-//     let result = await users.sequelize.query(
-//         `
-//         with tb1 as (
-//             SELECT iif(DATEPART(HOUR, [occurred])<7,dateadd(day,-1,[occurred]),[occurred]) as [occurred]
-//                   ,IIF(CAST(DATEPART(HOUR, [mc_status].[occurred]) AS int)=0,23,CAST(DATEPART(HOUR, [mc_status].[occurred]) AS int)) as [hour]     
-//                   ,[mc_status]
-//                   ,[mc_no]
-//               FROM [counter].[dbo].[mc_status]
-//               )
-// 			 , tb2 as (
-// 			  select convert(varchar,[occurred],120) as [occurred] 
-// 			 ,lead([occurred]) over(partition by [mc_no] order by [mc_no],[occurred]) AS [NextTimeStamp]
-// 			  ,[hour],[mc_status],[mc_no]
-// 			  from tb1
-// 			   where convert(varchar, [occurred], 23) = '${req.body.date}'
-//               and [mc_no] = '${req.body.machine}'
-// 			  )
-// 			  --select * from tb2
-//               select [occurred],convert(varchar,[NextTimeStamp],120) as [NextTimeStamp] ,[mc_no],[mc_status]
-//               from tb2
-//                order by CASE
-//                                      WHEN [hour] = 7 THEN 1
-//                                      WHEN [hour] = 8 THEN 2
-//                                      WHEN [hour] = 9 THEN 3
-//                                      WHEN [hour] = 10 THEN 4
-//                                      WHEN [hour] = 11 THEN 5
-//                                      WHEN [hour] = 12 THEN 6
-//                                      WHEN [hour] = 13 THEN 7
-//                                      WHEN [hour] = 14 THEN 8
-//                                      WHEN [hour] = 15 THEN 9
-//                                      WHEN [hour] = 16 THEN 10
-//                                      WHEN [hour] = 17 THEN 11
-//                                      WHEN [hour] = 18 THEN 12
-//                                      WHEN [hour] = 19 THEN 13
-//                                      WHEN [hour] = 20 THEN 14
-//                                      WHEN [hour] = 21 THEN 15
-//                                      WHEN [hour] = 22 THEN 16
-//                                      WHEN [hour] = 23 THEN 17
-//                                      WHEN [hour] = 0 THEN 18
-//                                      WHEN [hour] = 1 THEN 19
-//                                      WHEN [hour] = 2 THEN 20
-//                                      WHEN [hour] = 3 THEN 21
-//                                      WHEN [hour] = 4 THEN 22
-//                                      WHEN [hour] = 5 THEN 23
-//                                     WHEN [hour] = 6 THEN 24
-//                                     else 0   end
-            
-
-//       `
-//     );
-//     return res.json({ result: result[0] });
-// });
-
 router.post("/mc_status_log", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
@@ -255,7 +55,7 @@ router.post("/mc_status_log", async (req, res) => {
              ,convert(varchar,[NextTimeStamp] ,120) as [NextTimeStamp],[mc_status] from tb2 where [NextTimeStamp] is not null
       `
         );
-        return res.json({ result: Result[0] });
+        return res.json({ result: Result[0] ,api_result: constance.OK,});
     } catch (error) {
         res.json({
             error,
@@ -264,6 +64,74 @@ router.post("/mc_status_log", async (req, res) => {
     }
 });
 
+router.post("/Timeline_ARP", async (req, res) => {
+    var  command_process  = ``; 
+    if (req.body.responsible == "All") {
+        command_process = ``;
+    } else {
+        command_process = ` and [responsible] = '${req.body.responsible}'`;
+    }
+    let result = await users.sequelize.query(
+        `
+        with tb1 as(
+            select [topic],
+                   format (iif(DATEPART(HOUR, [occurred])<7,dateadd(day,-1,[occurred]),[occurred]),'yyyy-MM-dd') as mfg_date
+                   ,[occurred]
+                   ,[restored]
+                  --,convert(varchar, [mms].[occurred],120) as [occurred]
+                  --,convert(varchar, [mms].[restored],120) as [restored]
+                  ,IIF(CAST(DATEPART(HOUR, [mms].[occurred]) AS int)=0,23,CAST(DATEPART(HOUR, [mms].[occurred]) AS int)) as [hour]
+                  ,[mc_no]
+                  ,left([mc_no],2) as propcess 
+                  ,[sum]
+                  FROM [counter].[dbo].[mms]
+               ) 
+               ,tb2 as (
+             select tb1.mfg_date,tb1.[topic],tb1.[occurred] ,tb1.[restored],tb1.[hour],tb1.propcess ,tb1.[sum],tb1.[mc_no]
+             ,[topic_masters].[responsible]
+             from tb1 left join [topic_masters]
+             on tb1.[topic] = [topic_masters].[Topic]
+             )
+               select  mfg_date,[topic]
+                    ,convert(varchar,[occurred],120) as [occurred]
+                    ,convert(varchar,[restored],120) as [restored],[hour],[sum]
+                    ,[responsible],[mc_no]
+                    from tb2
+                    where mfg_date = '${req.body.date}'
+                    and [mc_no] = '${req.body.machine}'
+                    ` +
+                    command_process +
+    `
+                    order by CASE
+                                  WHEN [hour] = 7 THEN 1
+                                  WHEN [hour] = 8 THEN 2
+                                  WHEN [hour] = 9 THEN 3
+                                  WHEN [hour] = 10 THEN 4
+                                  WHEN [hour] = 11 THEN 5
+                                  WHEN [hour] = 12 THEN 6
+                                  WHEN [hour] = 13 THEN 7
+                                  WHEN [hour] = 14 THEN 8
+                                  WHEN [hour] = 15 THEN 9
+                                  WHEN [hour] = 16 THEN 10
+                                  WHEN [hour] = 17 THEN 11
+                                  WHEN [hour] = 18 THEN 12
+                                  WHEN [hour] = 19 THEN 13
+                                  WHEN [hour] = 20 THEN 14
+                                  WHEN [hour] = 21 THEN 15
+                                  WHEN [hour] = 22 THEN 16
+                                  WHEN [hour] = 23 THEN 17
+                                  WHEN [hour] = 0 THEN 18
+                                  WHEN [hour] = 1 THEN 19
+                                  WHEN [hour] = 2 THEN 20
+                                  WHEN [hour] = 3 THEN 21
+                                  WHEN [hour] = 4 THEN 22
+                                  WHEN [hour] = 5 THEN 23
+                                 WHEN [hour] = 6 THEN 24
+                           else 0   end ,[occurred]
+      `
+    );
+    return res.json({ result: result[0] });
+});
 router.post("/AlarmTopic_time", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
@@ -304,7 +172,6 @@ router.post("/AlarmTopic_time", async (req, res) => {
         })
     }
 });
-
 router.post("/Stop_time", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
@@ -433,5 +300,6 @@ router.post("/Stop_time", async (req, res) => {
         })
     }
 });
+
 
 module.exports = router;
