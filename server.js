@@ -40,12 +40,14 @@ app.use("/NAT_Dashboard/AVS_dash", require("./api/api_dash_AVS"))
 //AUTO NOISE process 
 app.use("/NAT_Dashboard/AN_dash", require("./api/api_dash_auto_noise")) 
 app.use("/NAT_Dashboard/AN_result", require("./api/api_AN_result")) 
-
 // AL 
 app.use("/NAT_Dashboard/AL_dash", require("./api/api_dash_AL")) 
 app.use("/NAT_Dashboard/AL_result", require("./api/api_AL_result")) 
 app.use("/NAT_Dashboard/Timeline_AL", require("./api/api_Timeline_AL"))    // chart mms
 app.use("/NAT_Dashboard/Timeline_TB", require("./api/api_Timeline_TB"))    //  chart mms 
+app.use("/NAT_Dashboard/Timeline_ARP", require("./api/api_Timeline_ARP"))    //  chart mms 
+app.use("/NAT_Dashboard/Timeline_AVS", require("./api/api_Timeline_AVS"))    //  chart mms 
+app.use("/NAT_Dashboard/Timeline_GSSM", require("./api/api_Timeline_GSSM"))    //  chart mms 
 app.use("/NAT_Dashboard/master_topic", require("./api/api_master_topic"))   
 
 app.listen(4001, () => { // ให้รันที่พอต 

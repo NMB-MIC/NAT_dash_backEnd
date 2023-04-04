@@ -1,8 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const Sequelize = require("Sequelize");
+// const Sequelize = require("Sequelize");
 const users = require("../model/users");
 const constance = require("../constance/constance");
+
 
 
 router.post("/mc_list", async (req, res) => {
@@ -11,7 +12,7 @@ router.post("/mc_list", async (req, res) => {
             `
             SELECT [mc_no]
             FROM [counter].[dbo].[mms]
-            where left([mc_no],3) = 'AVS' 
+            where [mc_no] like  'GSSM%' 
             group by [mc_no]
             order by [mc_no]
             `
@@ -29,8 +30,43 @@ router.post("/mc_list", async (req, res) => {
     }
 
 });
+router.post("/mc_status_log", async (req, res) => {
+    try {
+        let Result = await users.sequelize.query(
+            `
+            /* get status_log*/
+        with tb1 as (
+            SELECT format (iif(DATEPART(HOUR, [occurred])<7,dateadd(day,-1,[occurred]),[occurred]),'yyyy-MM-dd') as mfg_date
+            ,IIF(CAST(DATEPART(HOUR, [mc_status].[occurred]) AS int)=0,23,CAST(DATEPART(HOUR, [mc_status].[occurred]) AS int)) as [hour]     
+             --,iif(DATEPART(HOUR, [occurred])<7,dateadd(day,-1,[occurred]),[occurred]) as [occurred]
+             ,[occurred]
+            --,lead([occurred]) over(partition by [mc_no] order by [mc_no],[occurred]) AS [NextTimeStamp]
+            ,[mc_status]
+            ,[mc_no]
+            FROM [counter].[dbo].[mc_status]
+           ) ,tb2 as (
+             select  mfg_date,[occurred] 
+                  --,[NextTimeStamp]
+                   ,lead([occurred]) over(partition by [mc_no] order by [mc_no],[occurred]) AS [NextTimeStamp]
+                  ,[mc_status]
+                  ,[mc_no] 
+                  from tb1
+                  where [mc_no] ='${req.body.machine}' and  mfg_date = '${req.body.date}'
+           )
+             select mfg_date,convert(varchar,[occurred],120) as [occurred]
+             ,convert(varchar,[NextTimeStamp] ,120) as [NextTimeStamp],[mc_status] from tb2 where [NextTimeStamp] is not null
+      `
+        );
+        return res.json({ result: Result[0] ,api_result: constance.OK,});
+    } catch (error) {
+        res.json({
+            error,
+            api_result: constance.NOK,
+        })
+    }
+});
 
-router.post("/Timeline_AVS", async (req, res) => {
+router.post("/Timeline_GSSM", async (req, res) => {
     var  command_process  = ``; 
     if (req.body.responsible == "All") {
         command_process = ``;
@@ -98,43 +134,6 @@ router.post("/Timeline_AVS", async (req, res) => {
     );
     return res.json({ result: result[0] });
 });
-
-router.post("/mc_status_log", async (req, res) => {
-    try {
-        let Result = await users.sequelize.query(
-            `
-            /* get status_log*/
-        with tb1 as (
-            SELECT format (iif(DATEPART(HOUR, [occurred])<7,dateadd(day,-1,[occurred]),[occurred]),'yyyy-MM-dd') as mfg_date
-            ,IIF(CAST(DATEPART(HOUR, [mc_status].[occurred]) AS int)=0,23,CAST(DATEPART(HOUR, [mc_status].[occurred]) AS int)) as [hour]     
-             --,iif(DATEPART(HOUR, [occurred])<7,dateadd(day,-1,[occurred]),[occurred]) as [occurred]
-             ,[occurred]
-            --,lead([occurred]) over(partition by [mc_no] order by [mc_no],[occurred]) AS [NextTimeStamp]
-            ,[mc_status]
-            ,[mc_no]
-            FROM [counter].[dbo].[mc_status]
-           ) ,tb2 as (
-             select  mfg_date,[occurred] 
-                  --,[NextTimeStamp]
-                   ,lead([occurred]) over(partition by [mc_no] order by [mc_no],[occurred]) AS [NextTimeStamp]
-                  ,[mc_status]
-                  ,[mc_no] 
-                  from tb1
-                  where [mc_no] ='${req.body.machine}' and  mfg_date = '${req.body.date}'
-           )
-             select mfg_date,convert(varchar,[occurred],120) as [occurred]
-             ,convert(varchar,[NextTimeStamp] ,120) as [NextTimeStamp],[mc_status] from tb2 where [NextTimeStamp] is not null
-      `
-        );
-        return res.json({ result: Result[0] });
-    } catch (error) {
-        res.json({
-            error,
-            api_result: constance.NOK,
-        })
-    }
-});
-
 router.post("/AlarmTopic_time", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
@@ -175,7 +174,6 @@ router.post("/AlarmTopic_time", async (req, res) => {
         })
     }
 });
-
 router.post("/Stop_time", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
@@ -304,7 +302,6 @@ router.post("/Stop_time", async (req, res) => {
         })
     }
 });
-
 
 
 module.exports = router;
