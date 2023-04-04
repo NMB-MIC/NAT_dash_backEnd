@@ -4,13 +4,14 @@ const router = express.Router();
 const users = require("../model/users");
 const constance = require("../constance/constance");
 
-router.post("/mc_list", async (req, res) => {
+//IRB 
+router.post("/mc_list_IRB", async (req, res) => {
     try {
         let result = await users.sequelize.query(
             `
             SELECT [mc_no]
             FROM [counter].[dbo].[mms]
-            where [mc_no] like  'GSSM%' 
+            where [mc_no] like  'IRB%' 
             group by [mc_no]
             order by [mc_no]
             `
@@ -28,7 +29,7 @@ router.post("/mc_list", async (req, res) => {
     }
 
 });
-router.post("/mc_status_log", async (req, res) => {
+router.post("/mc_status_log_IRB", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
             `
@@ -63,8 +64,7 @@ router.post("/mc_status_log", async (req, res) => {
         })
     }
 });
-
-router.post("/Timeline_GSSM", async (req, res) => {
+router.post("/Timeline_IRB", async (req, res) => {
     var  command_process  = ``; 
     if (req.body.responsible == "All") {
         command_process = ``;
@@ -132,7 +132,7 @@ router.post("/Timeline_GSSM", async (req, res) => {
     );
     return res.json({ result: result[0] });
 });
-router.post("/AlarmTopic_time", async (req, res) => {
+router.post("/AlarmTopic_time_IRB", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
             `
@@ -172,7 +172,7 @@ router.post("/AlarmTopic_time", async (req, res) => {
         })
     }
 });
-router.post("/Stop_time", async (req, res) => {
+router.post("/Stop_time_IRB", async (req, res) => {
     try {
         let Result = await users.sequelize.query(
             `

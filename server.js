@@ -48,6 +48,8 @@ app.use("/NAT_Dashboard/Timeline_TB", require("./api/api_Timeline_TB"))    //  c
 app.use("/NAT_Dashboard/Timeline_ARP", require("./api/api_Timeline_ARP"))    //  chart mms 
 app.use("/NAT_Dashboard/Timeline_AVS", require("./api/api_Timeline_AVS"))    //  chart mms 
 app.use("/NAT_Dashboard/Timeline_GSSM", require("./api/api_Timeline_GSSM"))    //  chart mms 
+app.use("/NAT_Dashboard/Timeline_AOD", require("./api/api_Timeline_AOD")) 
+app.use("/NAT_Dashboard/Timeline_GN", require("./api/api_Timeline_GN")) 
 app.use("/NAT_Dashboard/master_topic", require("./api/api_master_topic"))   
 
 app.listen(4001, () => { // ให้รันที่พอต 

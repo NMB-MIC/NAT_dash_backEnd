@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-// const Sequelize = require("Sequelize");
+const Sequelize = require("Sequelize");
 const users = require("../model/users");
 const constance = require("../constance/constance");
 
@@ -10,7 +10,7 @@ router.post("/mc_list", async (req, res) => {
             `
             SELECT [mc_no]
             FROM [counter].[dbo].[mms]
-            where [mc_no] like  'GSSM%' 
+            where left([mc_no],3) = 'AOD' 
             group by [mc_no]
             order by [mc_no]
             `
@@ -63,8 +63,7 @@ router.post("/mc_status_log", async (req, res) => {
         })
     }
 });
-
-router.post("/Timeline_GSSM", async (req, res) => {
+router.post("/Timeline_AOD", async (req, res) => {
     var  command_process  = ``; 
     if (req.body.responsible == "All") {
         command_process = ``;
@@ -299,7 +298,7 @@ router.post("/Stop_time", async (req, res) => {
             api_result: constance.NOK,
         })
     }
-}); 
+});
 
 
 module.exports = router;
