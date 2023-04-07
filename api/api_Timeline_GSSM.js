@@ -63,7 +63,6 @@ router.post("/mc_status_log", async (req, res) => {
         })
     }
 });
-
 router.post("/Timeline_GSSM", async (req, res) => {
     var  command_process  = ``; 
     if (req.body.responsible == "All") {
