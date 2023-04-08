@@ -4,6 +4,7 @@ const router = express.Router();
 const users = require("../model/users");
 const constance = require("../constance/constance");
 
+
 router.post("/mc_list", async (req, res) => {
     try {
         let result = await users.sequelize.query(
