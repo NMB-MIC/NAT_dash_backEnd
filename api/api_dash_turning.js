@@ -1,9 +1,6 @@
 //Reference
 const express = require("express");
 const router = express.Router();
-const Sequelize = require("Sequelize");
-//Create constance and link to model
-// จะทำงาน แม้ว่ายังไม่มีการกด link ก็ตาม
 const users = require("../model/users");
 const constant = require("../constance/constance");
 const bcrypt = require("bcryptjs");
