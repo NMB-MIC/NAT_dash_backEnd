@@ -36,7 +36,10 @@ router.post("/MC_MMS", async (req, res) => {
     try {
         let getData = await users.sequelize.query(
             `
-            SELECT [mc_name]  FROM [counter].[dbo].[app_counter_machineno]
+            SELECT [mc_no]
+            FROM [counter].[dbo].[mms]
+            group by [mc_no]
+            order by [mc_no]
               `
         );
         return res.json({
